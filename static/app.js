@@ -1,26 +1,37 @@
-document.getElementById("loginForm").addEventListener("submit", async (e) => {
-  e.preventDefault(); // 🔴 VERY IMPORTANT
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Admin Dashboard</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
 
-  const username = document.getElementById("username").value;
-  const password = document.getElementById("password").value;
+<h2>Table Viewer</h2>
 
-  const res = await fetch("/api/login", {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ username, password })
-  });
+<select id="tableSelect"></select>
 
-  const data = await res.json();
+<input id="searchBox" placeholder="Search">
+<button onclick="loadTable()">Search</button>
+<button onclick="downloadCSV()">CSV</button>
 
-  if (!res.ok) {
-    document.getElementById("error").innerText =
-      data.detail || "Login failed";
-    return;
-  }
+<div>
+  <button onclick="prevPage()">Prev</button>
+  <span id="pageInfo"></span>
+  <button onclick="nextPage()">Next</button>
+</div>
 
-  // ✅ store JWT
-  localStorage.setItem("token", data.token);
+<table border="1" id="dataTable"></table>
 
-  // ✅ redirect after login
-  window.location.href = "/static/index.html";
-});
+<hr>
+
+<h3>Admin Permission Manager</h3>
+<input id="uid" placeholder="User ID">
+<input id="ptable" placeholder="Table Name">
+<label><input type="checkbox" id="read"> Read</label>
+<label><input type="checkbox" id="export"> Export</label>
+<button onclick="savePerm()">Save</button>
+
+<!-- 🔥 THIS WAS THE BUG 🔥 -->
+<script src="dashboard.js"></script>
+</body>
+</html>

@@ -1,17 +1,37 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <title>Dashboard</title>
+  <title>Admin Dashboard</title>
   <link rel="stylesheet" href="styles.css">
 </head>
 <body>
+
 <h2>Table Viewer</h2>
 
 <select id="tableSelect"></select>
-<button onclick="loadTable()">Load</button>
 
-<pre id="output"></pre>
+<input id="searchBox" placeholder="Search">
+<button onclick="loadTable()">Search</button>
+<button onclick="downloadCSV()">CSV</button>
 
-<script src="app.js"></script>
+<div>
+  <button onclick="prevPage()">Prev</button>
+  <span id="pageInfo"></span>
+  <button onclick="nextPage()">Next</button>
+</div>
+
+<table border="1" id="dataTable"></table>
+
+<hr>
+
+<h3>Admin Permission Manager</h3>
+<input id="uid" placeholder="User ID">
+<input id="ptable" placeholder="Table Name">
+<label><input type="checkbox" id="read"> Read</label>
+<label><input type="checkbox" id="export"> Export</label>
+<button onclick="savePerm()">Save</button>
+
+<!-- 🔥 THIS WAS THE BUG 🔥 -->
+<script src="dashboard.js"></script>
 </body>
 </html>
