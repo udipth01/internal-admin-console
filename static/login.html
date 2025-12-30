@@ -1,33 +1,10 @@
 <!DOCTYPE html>
-<html lang="en">
+<html>
 <head>
-  <meta charset="UTF-8" />
+  <meta charset="utf-8" />
   <title>Admin Login</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-
-  <link rel="stylesheet" href="styles.css" />
-
-  <style>
-    body {
-      font-family: Arial, sans-serif;
-      margin: 40px;
-    }
-    input {
-      padding: 10px;
-      margin-right: 10px;
-      width: 200px;
-    }
-    button {
-      padding: 10px 20px;
-      cursor: pointer;
-    }
-    #error {
-      margin-top: 15px;
-      color: red;
-    }
-  </style>
+  <link rel="stylesheet" href="styles.css">
 </head>
-
 <body>
 
   <h2>Admin Login</h2>
@@ -38,42 +15,36 @@
     <button type="submit">Login</button>
   </form>
 
-  <div id="error"></div>
+  <p id="error" style="color:red;"></p>
 
   <script>
-    document.getElementById("loginForm").addEventListener("submit", async function (e) {
-      e.preventDefault(); // 🚫 stop form reload
+    document.getElementById("loginForm").addEventListener("submit", async (e) => {
+      e.preventDefault();
 
-      const username = document.getElementById("username").value.trim();
+      const username = document.getElementById("username").value;
       const password = document.getElementById("password").value;
 
-      document.getElementById("error").innerText = "";
+      const res = await fetch("/api/login", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify({ username, password })
+      });
 
-      try {
-        const res = await fetch("/api/login", {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json"
-          },
-          body: JSON.stringify({ username, password })
-        });
+      const data = await res.json();
 
-        const data = await res.json();
-
-        if (!res.ok) {
-          document.getElementById("error").innerText = data.error || "Login failed";
-          return;
-        }
-
-        // ✅ Save JWT securely (client-side)
-        localStorage.setItem("admin_token", data.token);
-
-        // ✅ Redirect to dashboard
-        window.location.href = "/static/dashboard.html";
-
-      } catch (err) {
-        document.getElementById("error").innerText = "Server unreachable";
+      if (!res.ok) {
+        document.getElementById("error").innerText =
+          data.detail || "Login failed";
+        return;
       }
+
+      // ✅ Save JWT
+      localStorage.setItem("token", data.token);
+
+      // ✅ Redirect to dashboard
+      window.location.href = "/static/dashboard.html";
     });
   </script>
 
