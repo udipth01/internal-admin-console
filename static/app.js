@@ -1,37 +1,23 @@
-<!DOCTYPE html>
-<html>
-<head>
-  <title>Admin Dashboard</title>
-  <link rel="stylesheet" href="styles.css">
-</head>
-<body>
+document.getElementById("loginForm")?.addEventListener("submit", async (e) => {
+  e.preventDefault();
 
-<h2>Table Viewer</h2>
+  const username = document.getElementById("username").value;
+  const password = document.getElementById("password").value;
 
-<select id="tableSelect"></select>
+  const res = await fetch("/api/login", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ username, password })
+  });
 
-<input id="searchBox" placeholder="Search">
-<button onclick="loadTable()">Search</button>
-<button onclick="downloadCSV()">CSV</button>
+  const data = await res.json();
 
-<div>
-  <button onclick="prevPage()">Prev</button>
-  <span id="pageInfo"></span>
-  <button onclick="nextPage()">Next</button>
-</div>
+  if (!res.ok) {
+    document.getElementById("error").innerText =
+      data.detail || "Login failed";
+    return;
+  }
 
-<table border="1" id="dataTable"></table>
-
-<hr>
-
-<h3>Admin Permission Manager</h3>
-<input id="uid" placeholder="User ID">
-<input id="ptable" placeholder="Table Name">
-<label><input type="checkbox" id="read"> Read</label>
-<label><input type="checkbox" id="export"> Export</label>
-<button onclick="savePerm()">Save</button>
-
-<!-- 🔥 THIS WAS THE BUG 🔥 -->
-<script src="dashboard.js"></script>
-</body>
-</html>
+  localStorage.setItem("token", data.token);
+  window.location.href = "/static/dashboard.html";
+});
