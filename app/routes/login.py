@@ -1,39 +1,36 @@
-# app.py
-from flask import Flask, request, jsonify
+# app/routes/login.py
+from fastapi import APIRouter, HTTPException
+from pydantic import BaseModel
 import bcrypt, jwt, os
-from supabase import create_client
 
-app = Flask(__name__)
+from app.supabase_client import supabase
 
-supabase = create_client(
-    os.environ["SUPABASE_URL"],
-    os.environ["SUPABASE_SERVICE_ROLE_KEY"]
-)
+router = APIRouter()
 
 JWT_SECRET = os.environ["JWT_SECRET"]
 
-@app.post("/api/login")
-def login():
-    data = request.json
-    username = data.get("username")
-    password = data.get("password")
+class LoginRequest(BaseModel):
+    username: str
+    password: str
 
+@router.post("/api/login")
+def login(data: LoginRequest):
     res = supabase.table("admin_users") \
         .select("*") \
-        .eq("username", username) \
+        .eq("username", data.username) \
         .eq("is_active", True) \
         .execute()
 
     if not res.data:
-        return jsonify({"error": "Invalid credentials"}), 401
+        raise HTTPException(status_code=401, detail="Invalid credentials")
 
     user = res.data[0]
 
     if not bcrypt.checkpw(
-        password.encode(),
+        data.password.encode(),
         user["password_hash"].encode()
     ):
-        return jsonify({"error": "Invalid credentials"}), 401
+        raise HTTPException(status_code=401, detail="Invalid credentials")
 
     token = jwt.encode(
         {"user_id": user["id"], "role": user["role"]},
@@ -41,4 +38,4 @@ def login():
         algorithm="HS256"
     )
 
-    return jsonify({"token": token})
+    return {"token": token}
