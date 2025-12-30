@@ -1,52 +1,26 @@
-let currentPage = 1;
-const pageSize = 25;
+document.getElementById("loginForm").addEventListener("submit", async (e) => {
+  e.preventDefault(); // 🔴 VERY IMPORTANT
 
-async function loadTables() {
-  const res = await fetch("/tables", {
-    headers: { Authorization: "Bearer " + localStorage.token }
-  });
-  const tables = await res.json();
-  const sel = document.getElementById("tableSelect");
-  sel.innerHTML = "";
-  tables.forEach(t => sel.innerHTML += `<option>${t}</option>`);
-}
+  const username = document.getElementById("username").value;
+  const password = document.getElementById("password").value;
 
-async function loadTable() {
-  const table = tableSelect.value;
-  const q = searchBox.value || "";
-  const res = await fetch(
-    `/table/${table}?page=${currentPage}&page_size=${pageSize}&q=${q}`,
-    { headers: { Authorization: "Bearer " + localStorage.token } }
-  );
-  const data = await res.json();
-  output.textContent = JSON.stringify(data.data, null, 2);
-  pageInfo.textContent =
-    `Page ${data.page} of ${Math.ceil(data.total / pageSize)}`;
-}
-
-function nextPage() { currentPage++; loadTable(); }
-function prevPage() { if (currentPage > 1) currentPage--; loadTable(); }
-
-function downloadCSV() {
-  const table = tableSelect.value;
-  window.open(`/table/${table}/csv`, "_blank");
-}
-
-async function savePerm() {
-  await fetch("/admin/permission", {
+  const res = await fetch("/api/login", {
     method: "POST",
-    headers: {
-      "Authorization": "Bearer " + localStorage.token,
-      "Content-Type": "application/json"
-    },
-    body: JSON.stringify({
-      user_id: uid.value,
-      table_name: ptable.value,
-      can_read: read.checked,
-      can_export: export.checked
-    })
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ username, password })
   });
-  alert("Permission saved");
-}
 
-if (document.getElementById("tableSelect")) loadTables();
+  const data = await res.json();
+
+  if (!res.ok) {
+    document.getElementById("error").innerText =
+      data.detail || "Login failed";
+    return;
+  }
+
+  // ✅ store JWT
+  localStorage.setItem("token", data.token);
+
+  // ✅ redirect after login
+  window.location.href = "/static/index.html";
+});
